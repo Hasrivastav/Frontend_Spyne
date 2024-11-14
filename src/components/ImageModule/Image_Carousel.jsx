@@ -4,6 +4,7 @@ import { Box, Typography, IconButton } from "@mui/material";
 import axios from "axios";
 import { Delete as DeleteIcon } from "@mui/icons-material";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
+import toast from "react-hot-toast";
 
 const ImageUploadCarousel = ({ handleImageUpload }) => {
   const [uploadedImages, setUploadedImages] = useState([]);
@@ -26,13 +27,13 @@ const ImageUploadCarousel = ({ handleImageUpload }) => {
         formData
       );
       const cloudinaryUrl = response.data.secure_url;
-      console.log("Cloudinary Image URL:", cloudinaryUrl);
+     
 
       handleImageUpload(cloudinaryUrl);
 
       setUploadedImages((prev) => [...prev, cloudinaryUrl]);
     } catch (error) {
-      console.error("Error uploading image:", error);
+      toast.error("Error uploading image:", error);
     }
   };
 

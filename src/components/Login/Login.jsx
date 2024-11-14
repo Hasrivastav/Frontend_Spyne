@@ -12,6 +12,7 @@ import Button from '@mui/joy/Button';
 import Link from '@mui/joy/Link';
 import { BASE_URL } from '../../BASE_URL';
 import './login.css'
+import toast from 'react-hot-toast';
 
 async function handleAuthSubmit(event, isSignup, formData, navigate, setIsSignup, setFormData, login) {
   event.preventDefault();
@@ -24,25 +25,28 @@ async function handleAuthSubmit(event, isSignup, formData, navigate, setIsSignup
     });
 
     if (isSignup) {
-      console.log('Registration successful!');
+      toast.success('Registration successful!');
       setIsSignup(false);
       setFormData({ fullName: '', email: '', password: '' });
       navigate('/login');
     } else {
-      const { accessToken, refreshToken, user: { _id } } = response.data.data;
-  console.log(  accessToken, refreshToken)
+      
+      const { accessToken, refreshToken, user: { _id  ,email ,fullName } } = response.data.data;
+ 
       sessionStorage.setItem('accessToken', accessToken);
       sessionStorage.setItem('refreshToken', refreshToken);
       sessionStorage.setItem('userId', _id);
+      sessionStorage.setItem('name', fullName);
+      sessionStorage.setItem('email', email);
       
-      console.log('User logged in successfully!');
+      toast.success('User logged in successfully!');
       login(); 
       navigate('/details'); 
     }
   } catch (error) {
     const errorMsg = error.response?.data?.message || 'Something went wrong. Please try again.';
-    console.error('Error:', errorMsg);
-    alert(errorMsg);
+   
+    toast.error(errorMsg);
   }
 }
 

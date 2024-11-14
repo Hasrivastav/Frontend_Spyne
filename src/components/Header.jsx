@@ -7,6 +7,7 @@ import { Navigate, useNavigate } from "react-router-dom";
 import zIndex from "@mui/material/styles/zIndex";
 import { BASE_URL } from "../BASE_URL";
 import { height } from "@mui/system";
+import toast from "react-hot-toast";
 
 const headerStyles = {
   position: "sticky",  
@@ -78,8 +79,8 @@ const closeIconStyles = {
 };
 
 const user = {
-  name: "John Doe",
-  email: "john.doe@example.com",
+  name:"" ,
+  email:""
 };
 
 function Header() {
@@ -90,6 +91,8 @@ function Header() {
   const navigate = useNavigate();
 
   const handleIconClick = (event) => {
+    user.name = sessionStorage.getItem('name')
+    user.email = sessionStorage.getItem('email')
     setAnchorEl(event.currentTarget);
   };
 
@@ -102,7 +105,7 @@ function Header() {
       const token = sessionStorage.getItem("accessToken");
 
       if (!token) {
-        console.log("No token found, user is not logged in.");
+       
         return;
       }
 
@@ -117,10 +120,12 @@ function Header() {
       );
 
       logout();
+      toast.success('Logged out successfully')
       handlePopoverClose();
       navigate("/login");
+
     } catch (error) {
-      console.error(
+      toast.error(
         "Error logging out:",
         error.response ? error.response.data : error.message
       );
@@ -147,9 +152,7 @@ function Header() {
     };
   }, [anchorEl]);
 
-  useEffect(() => {
-    console.log("islogged", isLoggedIn);
-  }, [isLoggedIn]);
+
   return (
     <header style={headerStyles}>
       <div style={logoStyles}>
@@ -183,8 +186,8 @@ function Header() {
         <CloseIcon style={closeIconStyles} onClick={handlePopoverClose} />
 
         <div style={avatarStyles}></div>
-        <p>{user.name}</p>
-        <p>{user.email}</p>
+        <p>{user?.name}</p>
+        <p>{user?.email}</p>
         <button style={buttonStyles} onClick={handleLogout}>
           Logout
         </button>

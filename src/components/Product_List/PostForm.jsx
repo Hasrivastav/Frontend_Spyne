@@ -13,6 +13,7 @@ import ImageUploadCarousel from "../ImageModule/Image_Carousel";
 import axios from "axios";
 import ImageCarousel from "../ImageModule/ImagePreview";
 import { BASE_URL } from "../../BASE_URL";
+import toast from "react-hot-toast";
 
 const CardDetail = () => {
   const [cards, setCards] = useState([]);
@@ -35,42 +36,37 @@ const CardDetail = () => {
 
   const cardsToDisplay = searchQuery === "" ? cards : filteredCards;
 
+  const fetchCars = async () => {
+    try {
+      const userId = sessionStorage.getItem("userId");
+      const token = sessionStorage.getItem("accessToken");
 
+      if (!userId || !token) {
+        toast.warning("User is not authenticated.");
+        return;
+      }
+
+      const response = await axios.get(`${BASE_URL}/car/all/${userId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      if (response.status === 200) {
+        setCards(response.data.data);
+        setFilteredCards(response.data.data);
+      } else {
+        toast.error("Failed to fetch cars.");
+      }
+    } catch (error) {
+     
+      toast.error("An error occurred while fetching cars.");
+    }
+  };
 
   useEffect(() => {
-    const fetchCars = async () => {
-      try {
-        const userId = sessionStorage.getItem("userId");
-        const token = sessionStorage.getItem("accessToken");
-
-        if (!userId || !token) {
-          alert("User is not authenticated.");
-          return;
-        }
-
-        const response = await axios.get(
-          `${BASE_URL}/car/all/${userId}`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-
-        if (response.status === 200) {
-          setCards(response.data.data);
-          setFilteredCards(response.data.data);
-        } else {
-          alert("Failed to fetch cars.");
-        }
-      } catch (error) {
-        console.error("Error fetching cars:", error);
-        alert("An error occurred while fetching cars.");
-      }
-    };
-
     fetchCars();
-  }, [selectedCard , cardDetails]);
+  }, []);
 
   const handleAddNewClick = () => {
     setOpenModal(true);
@@ -104,7 +100,7 @@ const CardDetail = () => {
         !selectedCard.description ||
         selectedCard.images.length === 0)
     ) {
-      alert("Please fill in all fields and upload at least one image.");
+      toast.warning("Please fill in all fields and upload at least one image.");
       return;
     }
 
@@ -112,9 +108,7 @@ const CardDetail = () => {
       const token = sessionStorage.getItem("accessToken");
       const userId = sessionStorage.getItem("userId");
 
-      
       if (openUpdateModel && selectedCard) {
-       
         const response = await axios.put(
           `${BASE_URL}/car/${selectedCard._id}`,
           {
@@ -153,12 +147,14 @@ const CardDetail = () => {
             images: [],
           });
 
-          alert("Car updated successfully!");
+          toast.success("Car updated successfully!");
+          setTimeout(() => {
+            fetchCars();
+          }, 1000);
         } else {
-          alert("Failed to update car. Please try again.");
+          toast.error("Failed to update car. Please try again.");
         }
       } else {
-     
         const response = await axios.post(
           `${BASE_URL}/car/create`,
           {
@@ -200,40 +196,41 @@ const CardDetail = () => {
             images: [],
           });
 
-          alert("Car created successfully!");
+          toast.success("Car created successfully!");
+          setTimeout(() => {
+            fetchCars();
+          }, 1000);
         } else {
-          alert("Failed to create car. Please try again.");
+          toast.error("Failed to create car. Please try again.");
         }
       }
     } catch (error) {
-      console.error("Error saving car:", error);
-      alert("An error occurred. Please try again later.");
+   
+      toast.error("An error occurred. Please try again later.");
     }
   };
 
-  const handleDelete = async (carId) => {
+  const handleDelete = async (e, carId) => {
+    e.stopPropagation();
     try {
       const token = sessionStorage.getItem("accessToken");
-      const response = await axios.delete(
-        `${BASE_URL}/car/${carId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await axios.delete(`${BASE_URL}/car/${carId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (response.status === 200) {
         setCards(cards.filter((card) => card._id !== carId));
         setFilteredCards(cards.filter((card) => card._id !== carId));
 
-        alert("Car deleted successfully!");
+        toast.success("Car deleted successfully!");
       } else {
-        alert("Failed to delete car.");
+        toast.error("Failed to delete car.");
       }
     } catch (error) {
-      console.error("Error deleting car:", error);
-      alert("An error occurred while deleting the car.");
+      
+      toast.error("An error occurred while deleting the car.");
     }
   };
   const handleSearchChange = (e) => {
@@ -253,25 +250,21 @@ const CardDetail = () => {
     try {
       const token = sessionStorage.getItem("accessToken");
 
-      const response = await axios.get(
-        `${BASE_URL}/car/${cardId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await axios.get(`${BASE_URL}/car/${cardId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       if (response.status === 200) {
-        console.log("response.data.data", response.data.data);
+       
         setSelectedCard(response.data.data);
         setUpdateModel(true);
       } else {
-        alert("Failed to fetch card details.");
+        toast.error("Failed to fetch card details.");
       }
     } catch (error) {
-      console.error("Error fetching card details:", error);
-      alert("An error occurred while fetching card details.");
+      toast.error("An error occurred while fetching card details.");
     }
   };
   return (
@@ -316,7 +309,6 @@ const CardDetail = () => {
             ></i>
           </div>
 
-      
           <button
             onClick={handleAddNewClick}
             style={{
@@ -339,7 +331,6 @@ const CardDetail = () => {
         </div>
       </div>
 
-   
       {cardsToDisplay.length === 0 ? (
         <div
           style={{
@@ -357,7 +348,14 @@ const CardDetail = () => {
           </Typography>
         </div>
       ) : (
-        <div style={{ display: "flex", justifyContent:"space-evenly",flexWrap: "wrap", marginTop: "20px" }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "space-evenly",
+            flexWrap: "wrap",
+            marginTop: "20px",
+          }}
+        >
           {cardsToDisplay.map((card) => (
             <div
               key={card._id}
@@ -385,11 +383,10 @@ const CardDetail = () => {
                   <h4>{card.name}</h4>
 
                   <DeleteIcon
-                    onClick={() => handleDelete(card._id)}
+                    onClick={(e) => handleDelete(e, card._id)}
                     color="error"
                   />
                 </Box>
-                
 
                 <Carousel showThumbs={false} showArrows={false}>
                   {card.images.map((img, idx) => (
@@ -439,7 +436,7 @@ const CardDetail = () => {
               onChange={(e) =>
                 setCardDetails({ ...cardDetails, name: e.target.value })
               }
-              className="modal-input"
+              className="modal-input_name"
             />
             <input
               type="text"
@@ -448,10 +445,9 @@ const CardDetail = () => {
               onChange={(e) =>
                 setCardDetails({ ...cardDetails, description: e.target.value })
               }
-              className="modal-input"
+              className="modal-input_name"
             />
 
-         
             <ImageUploadCarousel handleImageUpload={handleImageUpload} />
           </div>
         </div>

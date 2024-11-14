@@ -5,6 +5,7 @@ import { Delete as DeleteIcon } from "@mui/icons-material";
 import "react-responsive-carousel/lib/styles/carousel.min.css";
 import axios from "axios";
 import { useEffect } from "react";
+import toast from "react-hot-toast";
 
 const ImageCarousel = ({
   setSelectedCard,
@@ -42,11 +43,11 @@ const ImageCarousel = ({
         formData
       );
       const cloudinaryUrl = response.data.secure_url;
-      console.log("Cloudinary Image URL:", cloudinaryUrl);
+   
 
       handleImageUpload(cloudinaryUrl);
     } catch (error) {
-      console.error("Error uploading image:", error);
+      toast.error("Error uploading image:", error);
     }
   };
 
