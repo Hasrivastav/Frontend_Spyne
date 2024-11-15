@@ -16,7 +16,7 @@ const routes = [
     ),
   },
   {
-    path: "/api/docs", 
+    path: "/docs", 
     element: <ApiDocumentation />, 
   },
 ];
