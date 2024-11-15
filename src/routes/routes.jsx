@@ -1,6 +1,7 @@
 import CardDetail from "../components/Product_List/PostForm";
 import Login from "../components/Login/Login";
 import PrivateRoute from "./routeProtection";
+import ApiDocumentation from "../components/documentation/documentation";
 
 const routes = [
   { path: "/", element: <Login /> },
@@ -13,6 +14,10 @@ const routes = [
         <CardDetail />
       </PrivateRoute>
     ),
+  },
+  {
+    path: "/api/docs", 
+    element: <ApiDocumentation />, 
   },
 ];
 
