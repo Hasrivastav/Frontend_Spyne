@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { BASE_URL } from '../../BASE_URL';
 
 const ApiDocumentation = () => {
   const [docHtml, setDocHtml] = useState('');
 
   useEffect(() => {
   
-    axios.get('http://localhost:3000/api/v1/docs')
+    axios.get(`${BASE_URL}/docs`)
       .then((response) => {
         setDocHtml(response.data);
       })
